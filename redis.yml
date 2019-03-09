@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postfacto-redis
+  labels:
+    app: postfacto-redis
+spec:
+  type: ClusterIP
+  ports:
+   - port: 6379
+  selector:
+   app: postfacto-redis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postfacto-redis
+  labels:
+    app: postfacto-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postfacto-redis
+  template:
+    metadata:
+      labels:
+        app: postfacto-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        imagePullPolicy: Never # Just for local testing
+        ports:
+        - containerPort: 6379
