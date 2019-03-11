@@ -1,4 +1,15 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: postfacto-postgres
+type: Opaque
+data:
+  username: cGd1c2Vy
+  password: cGdwYXNz
+
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: postfacto-postgres
