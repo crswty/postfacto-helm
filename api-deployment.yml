@@ -42,10 +42,17 @@ spec:
             secretKeyRef:
               name: postfacto-postgres
               key: password
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postfacto-postgres
+              key: db
         - name: DATABASE_URL
-          value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTFACTO_REDIS_SERVICE_HOST):$(POSTFACTO_REDIS_SERVICE_PORT)
+          value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTFACTO_POSTGRES_SERVICE_HOST):$(POSTFACTO_POSTGRES_SERVICE_PORT)/$(POSTGRES_DB)
         - name: SECRET_KEY_BASE #TODO make dynamic from secret
           value: 197df7d5dc9975871658837aad5716e72b3b238c124a12873b833e1425ea1386cb81a25ccaca6aa0643ad91372fd3bc59ba269279fcb1aff2554db1baa21b163
+        - name: CLIENT_ORIGIN
+          value: http://postfacto-api.com
         - name: REDIS_URL
           value: $(POSTFACTO_REDIS_SERVICE_HOST)
         imagePullPolicy: Never # Just for local testing
