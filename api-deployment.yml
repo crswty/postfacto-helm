@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postfacto-api
+  labels:
+    app: postfacto-api
+spec:
+  type: LoadBalancer
+  ports:
+   - port: 3000
+  selector:
+   app: postfacto-api
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postfacto-api
+  labels:
+    app: postfacto-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postfacto-api
+  template:
+    metadata:
+      labels:
+        app: postfacto-api
+    spec:
+      containers:
+      - name: postfacto-api
+        image: postfacto-api
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postfacto-postgres
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postfacto-postgres
+              key: password
+        - name: DATABASE_URL
+          value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTFACTO_REDIS_SERVICE_HOST):$(POSTFACTO_REDIS_SERVICE_PORT)
+        - name: SECRET_KEY_BASE #TODO make dynamic from secret
+          value: 197df7d5dc9975871658837aad5716e72b3b238c124a12873b833e1425ea1386cb81a25ccaca6aa0643ad91372fd3bc59ba269279fcb1aff2554db1baa21b163
+        - name: REDIS_URL
+          value: $(POSTFACTO_REDIS_SERVICE_HOST)
+        imagePullPolicy: Never # Just for local testing
+        ports:
+        - containerPort: 3000
