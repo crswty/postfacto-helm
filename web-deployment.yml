@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postfacto-web
+  labels:
+    app: postfacto-web
+spec:
+  type: LoadBalancer
+  ports:
+   - port: 3000
+  selector:
+   app: postfacto-web
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postfacto-web
+  labels:
+    app: postfacto-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postfacto-web
+  template:
+    metadata:
+      labels:
+        app: postfacto-web
+    spec:
+      containers:
+      - name: postfacto-web
+        image: postfacto-web
+        imagePullPolicy: Never # Just for local testing
+        ports:
+        - containerPort: 3000
