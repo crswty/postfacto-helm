@@ -44,7 +44,6 @@ spec:
       containers:
       - name: postgres
         image: postgres
-        imagePullPolicy: Never # TODO remove Just for local testing
         ports:
         - containerPort: 5432
         env:
