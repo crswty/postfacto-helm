@@ -7,7 +7,10 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-   - port: 3000
+   - name: http
+     port: 80
+     targetPort: 3000
+   # - websocket: 3000
   selector:
    app: postfacto-api
 
@@ -49,10 +52,20 @@ spec:
               key: db
         - name: DATABASE_URL
           value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTFACTO_POSTGRES_SERVICE_HOST):$(POSTFACTO_POSTGRES_SERVICE_PORT)/$(POSTGRES_DB)
+        - name: RAILS_ENV
+          value: production
+        - name: RAILS_SERVE_STATIC_FILES
+          value: "true"
+        - name: ADMIN_EMAIL
+          value: email@example.com
+        - name: ADMIN_PASSWORD
+          value: password
         - name: SECRET_KEY_BASE #TODO make dynamic from secret
           value: 197df7d5dc9975871658837aad5716e72b3b238c124a12873b833e1425ea1386cb81a25ccaca6aa0643ad91372fd3bc59ba269279fcb1aff2554db1baa21b163
         - name: CLIENT_ORIGIN #TODO work out how to do this
-          value: http://postfacto-api.com
+          value: http://192.168.99.100:30960
+        - name: WEBSOCKET_PORT
+          value: "3000"
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
