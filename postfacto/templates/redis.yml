@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "postfacto.fullname" . }}-redis
+type: Opaque
+data:
+  password: {{ .Values.redis.password | b64enc }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postfacto.fullname" . }}-redis
+  labels:
+    app: {{ include "postfacto.fullname" . }}-redis
+spec:
+  type: ClusterIP
+  ports:
+   - port: 6379
+  selector:
+   app: {{ include "postfacto.fullname" . }}-redis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "postfacto.fullname" . }}-redis
+  labels:
+    app: {{ include "postfacto.fullname" . }}-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "postfacto.fullname" . }}-redis
+  template:
+    metadata:
+      labels:
+        app: {{ include "postfacto.fullname" . }}-redis
+    spec:
+      containers:
+      - name: redis
+        image: bitnami/redis
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postfacto.fullname" . }}-redis
+              key: password
+        ports:
+        - containerPort: 6379

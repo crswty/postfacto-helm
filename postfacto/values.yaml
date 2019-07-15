@@ -1,0 +1,28 @@
+# Default values for postfacto.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+postgres:
+  username: pguser
+  password: pgpass
+  database: postfacto
+
+redis:
+  password: redispass
+
+postfactoApi:
+  containerVersion: 0.0.1
+  secretKeyBase: # Override this with previous value on upgrade
+  admin:
+    email: admin@example.com
+    password: password
+  clientOrigin: http://192.168.99.100:30960
+  websocketPort: 3000
+
+postfactoWeb:
+  containerVersion: 0.0.1
+  apiUrl: http://192.168.99.100:31645
+  websocketUrl: ws://192.168.99.100:31645/cable
+
+
+# imagePullPolicy: Never

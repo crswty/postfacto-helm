@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postfacto.fullname" . }}-api
+  labels:
+    app: {{ include "postfacto.fullname" . }}-api
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+  selector:
+   app: postfacto-api
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "postfacto.fullname" . }}-api
+  labels:
+    app: {{ include "postfacto.fullname" . }}-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "postfacto.fullname" . }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ include "postfacto.fullname" . }}-api
+    spec:
+      containers:
+      - name: postfacto-api
+        image: crswty/postfacto-api:{{ .Values.postfactoApi.containerVersion }}
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postfacto.fullname" . }}-postgres
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postfacto.fullname" . }}-postgres
+              key: password
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postfacto.fullname" . }}-postgres
+              key: db
+        - name: DATABASE_URL
+          value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$({{ .Release.Name | upper }}_POSTFACTO_POSTGRES_SERVICE_HOST):$({{ .Release.Name | upper }}_POSTFACTO_POSTGRES_SERVICE_PORT)/$(POSTGRES_DB)
+        - name: RAILS_ENV
+          value: production
+        - name: RAILS_SERVE_STATIC_FILES
+          value: "true"
+        - name: ADMIN_EMAIL
+          value: {{ .Values.postfactoApi.admin.email }}
+        - name: ADMIN_PASSWORD
+          value: {{ .Values.postfactoApi.admin.password }}
+        - name: SECRET_KEY_BASE
+          value: {{ .Values.postfactoApi.secretKeyBase | default (randAlphaNum 128) }}
+        - name: CLIENT_ORIGIN
+          value: {{ .Values.postfactoApi.clientOrigin }}
+        - name: WEBSOCKET_PORT
+          value: {{ .Values.postfactoApi.websocketPort | quote }}
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postfacto.fullname" . }}-redis
+              key: password
+        - name: REDIS_URL
+          value: redis://:$(REDIS_PASSWORD)@$({{ .Release.Name | upper }}_POSTFACTO_REDIS_SERVICE_HOST):$({{ .Release.Name | upper }}_POSTFACTO_REDIS_SERVICE_PORT)
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - containerPort: 3000

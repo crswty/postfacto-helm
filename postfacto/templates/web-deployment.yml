@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postfacto.fullname" . }}-web
+  labels:
+    app: {{ include "postfacto.fullname" . }}-web
+spec:
+  type: LoadBalancer
+  ports:
+   - port: 3000
+  selector:
+   app: {{ include "postfacto.fullname" . }}-web
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "postfacto.fullname" . }}-web
+  labels:
+    app: {{ include "postfacto.fullname" . }}-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "postfacto.fullname" . }}-web
+  template:
+    metadata:
+      labels:
+        app: {{ include "postfacto.fullname" . }}-web
+    spec:
+      containers:
+      - name: postfacto-web
+        image: crswty/postfacto-web:{{ .Values.postfactoWeb.containerVersion }}
+        env:
+        - name: API_URL
+          value: {{ .Values.postfactoWeb.apiUrl | quote }}
+        - name: WS_URL
+          value: {{ .Values.postfactoWeb.websocketUrl | quote }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - containerPort: 3000
